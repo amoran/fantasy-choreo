@@ -8,22 +8,7 @@ const port = process.env.PORT || 80;
 // JOBS
 import slateRefresh from './jobs/slateRefresh';
 
-
-// LOCAL DEV HANDLING
-if (process.env.MONGODB_URI) {
-  start(process.env.MONGODB_URI);
-} else {
-  // Locally
-  console.log('USING LOCAL IN-MEMORY MONGO');
-
-  let MongoMemoryServer = mongodbmock.MongoMemoryServer;
-  const mongod = new MongoMemoryServer();
-  mongod.getConnectionString().then((mongoUri) => {
-    start(mongoUri);    
-  });
-}
-
-// STARTUP
+// STARTUP DEFINITION
 const start = (mongoUri) => {
   // Start Agenda
   const agenda = new Agenda({db: {address: mongoUri}});
@@ -38,4 +23,18 @@ const start = (mongoUri) => {
     await agenda.start();
     await agenda.every('10 seconds', 'slate refresh', {sport: 'nfl'});
   })();
+}
+
+// LOCAL DEV HANDLING
+if (process.env.MONGODB_URI) {
+  start(process.env.MONGODB_URI);
+} else {
+  // Locally
+  console.log('USING LOCAL IN-MEMORY MONGO');
+
+  let MongoMemoryServer = mongodbmock.MongoMemoryServer;
+  const mongod = new MongoMemoryServer();
+  mongod.getConnectionString().then((mongoUri) => {
+    start(mongoUri);    
+  });
 }
