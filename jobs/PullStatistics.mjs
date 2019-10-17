@@ -6,7 +6,15 @@ export default function(agenda, db) {
     console.log(`(PullStatistics) Finding Entries needing stats`);
 
     db.collection('entries').find({
-      result: {$exists: false},
+      $or: [{
+        result: {
+          $exists: false
+        }
+      }, {
+        'result.score': {
+          $exists: false
+        }
+      }],
       entryId: {
         $exists: true,
         $ne: null
@@ -22,8 +30,7 @@ export default function(agenda, db) {
         agenda.schedule(`in ${i} seconds`, 'PullStatisticsByEntry', {entryId});          
       });
 
-    })
-
+    });
     
   });
 }

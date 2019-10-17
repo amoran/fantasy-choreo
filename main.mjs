@@ -25,7 +25,8 @@ mongodb.MongoClient.connect(MONGO_CONN_STR, mongoOptions, function(err, client) 
   console.log(`Connected successfully to MongoDB: ${MONGO_CONN_STR}`);
 
   // Start Agenda
-  const agenda = new Agenda({mongo: client.db("fantasy")});
+  let agendaDb = process.env.PORT ? "fantasy" : "tempfantasy";
+  const agenda = new Agenda({mongo: client.db(agendaDb)});
 
   // Start agenda dashboard
   var app = express();

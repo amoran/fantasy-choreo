@@ -19,7 +19,9 @@ export default function(agenda, db) {
           rank: entryResponse.data.entries[0].rank,
           size: entryResponse.data.contests[0].size.max,
           won: entryResponse.data.entries[0].prizes.total,
-          entryFee: entryResponse.data.contests[0].entry_fee
+          entryFee: entryResponse.data.contests[0].entry_fee,
+          score: entryResponse.data.rosters[0].score,
+          startDate: entryResponse.data.contests[0].start_date
         };
 
         //Put the data in the db.
