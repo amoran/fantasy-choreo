@@ -1,7 +1,7 @@
 import axios from 'axios';
 import {FANDUEL_WRAPPER_HOST} from '../constants.mjs';
 
-export default function(agenda) {
+export default function(agenda, db) {
   agenda.define('RefreshSlates', {priority: 'high', concurrency: 1}, async job => {
     const {sport} = job.attrs.data;
     console.log(`(RefreshSlates) Refreshing ${sport} slates`);
@@ -9,6 +9,16 @@ export default function(agenda) {
     axios.get(`${FANDUEL_WRAPPER_HOST}/slates/${sport}`)
       .then(slatesResponse => {
         const slateIds = slatesResponse.data.map(slate => slate.id);
+
+        // Upsert slates into database
+        slatesResponse.data.forEach(slate => {
+          db.collection('slates').update({id: slate.id}, slate, {upsert: true}, (err, res) => {
+            if (err) {
+              console.error(err);
+              return;
+            }             
+          });
+        });
 
         agenda.jobs({name: 'GenerateLineupForSlateAndEnterContests'})
         .then(jobs => {
@@ -18,12 +28,7 @@ export default function(agenda) {
             if (slateIdsWithJobs.indexOf(slate.id) < 0) {
   
               const data = {
-                contestsUrl: slate.contests,
                 id: slate.id,
-                label: slate.label,
-                playersUrl: slate.players,
-                salaryCap: slate.salaryCap,
-                startDate: slate.startDate
               };
   
               // Reserve entries to contests

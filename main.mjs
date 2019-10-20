@@ -34,7 +34,7 @@ mongodb.MongoClient.connect(MONGO_CONN_STR, mongoOptions, function(err, client) 
   app.use('/dash', Agendash(agenda, {title: 'Fantasy Job Dashboard'}));
   app.listen(port, () => console.log(`Fantasy Job Dashboard listening on port ${port}!`));  
   
-  RefreshSlates(agenda);
+  RefreshSlates(agenda, client.db("fantasy"));
   GenerateLineupForSlateAndEnterContests(agenda, client.db("fantasy"));
   JoinContestWithLineups(agenda, client.db("fantasy"));
   UpdateRoster(agenda, client.db("fantasy"));

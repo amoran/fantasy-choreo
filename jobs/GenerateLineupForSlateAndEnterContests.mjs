@@ -3,11 +3,11 @@ import {FANDUEL_WRAPPER_HOST, LINEUP_API_HOST} from '../constants.mjs';
 
 export default function(agenda, db) {
   agenda.define('GenerateLineupForSlateAndEnterContests', {priority: 'high', concurrency: 1}, async job => {
-    const {contestsUrl, id, label, playersUrl, salaryCap, startDate} = job.attrs.data;
+    const {id} = job.attrs.data;
     console.log(`(GenerateLineupForSlateAndEnterContests) Generating Lineups and Entering Contests for Slate ${id}`);
 
     // Get players in this slate
-    axios.get(`${FANDUEL_WRAPPER_HOST}${playersUrl}`)
+    axios.get(`${FANDUEL_WRAPPER_HOST}/slates/${id}/players`)
       .then(playersResponse => {
 
         // Generate lineup for these players
@@ -20,7 +20,7 @@ export default function(agenda, db) {
             console.log(`(GenerateLineupForSlateAndEnterContests) Generated ${validLineups.length} valid lineups for slateId ${id}`);
 
             // Get Available contests
-            axios.get(`${FANDUEL_WRAPPER_HOST}${contestsUrl}`)
+            axios.get(`${FANDUEL_WRAPPER_HOST}/slates/${id}/contests`)
               .then(contestsResponse => {
                 let availableContestIds = contestsResponse.data.map(contest => contest.id);
                 console.log(`(GenerateLineupForSlateAndEnterContests) Available contests for slate ${id}: ${availableContestIds}`)
@@ -32,8 +32,8 @@ export default function(agenda, db) {
                       console.error(err);
                       return;
                     }             
-                  })
-                })
+                  });
+                });
                 
 
                 // Get Current Rosters
