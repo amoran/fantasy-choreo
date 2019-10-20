@@ -25,6 +25,12 @@ export default function(agenda, db) {
                 let availableContestIds = contestsResponse.data.map(contest => contest.id);
                 console.log(`(GenerateLineupForSlateAndEnterContests) Available contests for slate ${id}: ${availableContestIds}`)
 
+                // Upsert all contests to db
+                db.collection('contests').updateMany({id: {$in: availableContestIds}}, contestsResponse.data, {upsert: true}, (err, res) => {
+                  if (err) console.error(err);
+                  console.log(`Saving ${res.result.nModified} contests to DB`);                  
+                })
+
                 // Get Current Rosters
                 axios.get(`${FANDUEL_WRAPPER_HOST}/my/entriestest?slateId=${id}`)
                   .then(entriesResponse => {
