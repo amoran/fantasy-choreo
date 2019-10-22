@@ -28,7 +28,7 @@ export default function(agenda, db) {
             let indexOfMatchingJob = slateIdsWithJobs.indexOf(slate.id);
             let jobExists = indexOfMatchingJob >= 0;
 
-            if (jobExists) {
+            if (!jobExists) {
               
               const data = {
                 id: slate.id,
