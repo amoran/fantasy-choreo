@@ -1,5 +1,5 @@
 import axios from 'axios';
-import {FANDUEL_WRAPPER_HOST, LINEUP_API_HOST} from '../constants.mjs';
+import {FANDUEL_WRAPPER_HOST, LINEUP_API_HOST, INJURED_STATUSES} from '../constants.mjs';
 
 export default function(agenda, db) {
   agenda.define('GenerateLineupForSlateAndEnterContests', {priority: 'high', concurrency: 1}, async job => {
@@ -18,8 +18,12 @@ export default function(agenda, db) {
           }
         });
 
+        let nonInjuredPlayers = cleanedPlayers.filter(player => {
+          return INJURED_STATUSES.includes((player.injury_status || '').toLowerCase());
+        });
+
         // Generate lineup for these players
-        axios.post(`${LINEUP_API_HOST}/api/lineup`, cleanedPlayers)
+        axios.post(`${LINEUP_API_HOST}/api/lineup`, nonInjuredPlayers)
           .then(lineupResponse => {
             let validLineups = lineupResponse.data.filter(lineup => {
               return lineup.players.length === 9;
