@@ -20,7 +20,7 @@ export default function(agenda, db) {
           });
         });
 
-        agenda.jobs({name: 'GenerateLineupForSlateAndEnterContests'})
+        agenda.jobs({name: 'GenerateLineupForSlateAndEnterContests', nextRunAt: {$ne: null}})
         .then(jobs => {
           const slateIdsWithJobs = jobs.map(job => job.attrs.data.id);
           const nextRunAtsForJobs = jobs.map(job => job.attrs.nextRunAt);
@@ -32,7 +32,7 @@ export default function(agenda, db) {
 
             if (slate.id === '39582') {
               let relJob = jobs.find(job => {
-                job.attrs.data.id === slate.id
+                return job.attrs.data.id === slate.id;
               });
               console.log(relJob);
               console.log(jobExists);
