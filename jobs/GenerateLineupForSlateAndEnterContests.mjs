@@ -10,8 +10,16 @@ export default function(agenda, db) {
     axios.get(`${FANDUEL_WRAPPER_HOST}/slates/${id}/players`)
       .then(playersResponse => {
 
+        let cleanedPlayers = playersResponse.data.map(player => {
+          return {
+            ...player,
+            fppg: player.fppg || 0,
+            name: `${player.first_name} ${player.last_name}`
+          }
+        });
+
         // Generate lineup for these players
-        axios.post(`${LINEUP_API_HOST}/api/lineup`, playersResponse.data)
+        axios.post(`${LINEUP_API_HOST}/api/lineup`, cleanedPlayers)
           .then(lineupResponse => {
             let validLineups = lineupResponse.data.filter(lineup => {
               return lineup.players.length === 9;
