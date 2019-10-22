@@ -23,10 +23,12 @@ export default function(agenda, db) {
         agenda.jobs({name: 'GenerateLineupForSlateAndEnterContests'})
         .then(jobs => {
           const slateIdsWithJobs = jobs.map(job => job.attrs.data.id);
+          const nextRunAtsForJobs = jobs.map(job => job.attrs.nextRunAt);
           console.log(jobs);
 
           slatesResponse.data.forEach(slate => {
-            if (slateIdsWithJobs.indexOf(slate.id) < 0) {
+            let indexOfMatchingJob = slateIdsWithJobs.indexOf(slate.id)
+            if (indexOfMatchingJob < 0 || nextRunAtsForJobs[indexOfMatchingJob] === null) {
               
               const data = {
                 id: slate.id,
