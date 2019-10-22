@@ -19,7 +19,7 @@ export default function(agenda, db) {
         });
 
         let nonInjuredPlayers = cleanedPlayers.filter(player => {
-          return INJURED_STATUSES.includes((player.injury_status || '').toLowerCase());
+          return !INJURED_STATUSES.includes((player.injury_status || '').toLowerCase());
         });
 
         // Generate lineup for these players
