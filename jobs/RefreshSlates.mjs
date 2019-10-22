@@ -12,7 +12,7 @@ export default function(agenda, db) {
 
         // Upsert slates into database
         slatesResponse.data.forEach(slate => {
-          db.collection('slates').updateOne({id: slate.id}, slate, {upsert: true}, (err, res) => {
+          db.collection('slates').updateOne({id: slate.id}, {$set: slate}, {upsert: true}, (err, res) => {
             if (err) {
               console.error(err);
               return;
@@ -29,6 +29,16 @@ export default function(agenda, db) {
             let indexOfMatchingJob = slateIdsWithJobs.indexOf(slate.id);
             let jobExists = indexOfMatchingJob >= 0;
             let jobNextRunAt = nextRunAtsForJobs[indexOfMatchingJob];
+
+            if (slate.id === '39582') {
+              let relJob = jobs.find(job => {
+                job.attrs.data.id === slate.id
+              });
+              console.log(relJob);
+              console.log(jobExists);
+              console.log(jobNextRunAt);
+            }
+
             if (!jobExists || jobNextRunAt == null) {
               
               const data = {
