@@ -24,11 +24,12 @@ export default function(agenda, db) {
         .then(jobs => {
           const slateIdsWithJobs = jobs.map(job => job.attrs.data.id);
           const nextRunAtsForJobs = jobs.map(job => job.attrs.nextRunAt);
-          console.log(jobs);
 
           slatesResponse.data.forEach(slate => {
-            let indexOfMatchingJob = slateIdsWithJobs.indexOf(slate.id)
-            if (indexOfMatchingJob < 0 || nextRunAtsForJobs[indexOfMatchingJob] === null) {
+            let indexOfMatchingJob = slateIdsWithJobs.indexOf(slate.id);
+            let jobExists = indexOfMatchingJob >= 0;
+            let jobNextRunAt = nextRunAtsForJobs[indexOfMatchingJob];
+            if (!jobExists || jobNextRunAt == null) {
               
               const data = {
                 id: slate.id,
