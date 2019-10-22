@@ -23,23 +23,12 @@ export default function(agenda, db) {
         agenda.jobs({name: 'GenerateLineupForSlateAndEnterContests', nextRunAt: {$ne: null}})
         .then(jobs => {
           const slateIdsWithJobs = jobs.map(job => job.attrs.data.id);
-          const nextRunAtsForJobs = jobs.map(job => job.attrs.nextRunAt);
 
           slatesResponse.data.forEach(slate => {
             let indexOfMatchingJob = slateIdsWithJobs.indexOf(slate.id);
             let jobExists = indexOfMatchingJob >= 0;
-            let jobNextRunAt = nextRunAtsForJobs[indexOfMatchingJob];
 
-            if (slate.id === '39582') {
-              let relJob = jobs.find(job => {
-                return job.attrs.data.id === slate.id;
-              });
-              console.log(relJob);
-              console.log(jobExists);
-              console.log(jobNextRunAt);
-            }
-
-            if (!jobExists || jobNextRunAt == null) {
+            if (jobExists) {
               
               const data = {
                 id: slate.id,
@@ -51,7 +40,7 @@ export default function(agenda, db) {
   
               // Rerun lineup generation close to slate start to get latest projections
               console.log(`(RefreshSlates) Scheduling future job for GenerateLineupForSlateAndEnterContests for slate ${slate.id}`)              
-              const fifteenMinsBeforeSlateStart = new Date(new Date(slate.startDate) - (1000 * 60 * 15));
+              const fifteenMinsBeforeSlateStart = new Date(new Date(slate.start_date) - (1000 * 60 * 15));
               agenda.schedule(fifteenMinsBeforeSlateStart, 'GenerateLineupForSlateAndEnterContests', data);
             } else {
               console.log(`(RefreshSlates) Already scheduled: future job for GenerateLineupForSlateAndEnterContests for slate ${slate.id}`)
