@@ -12,7 +12,7 @@ export default function(agenda, db) {
 
         // Upsert slates into database
         slatesResponse.data.forEach(slate => {
-          db.collection('slates').update({id: slate.id}, slate, {upsert: true}, (err, res) => {
+          db.collection('slates').updateOne({id: slate.id}, slate, {upsert: true}, (err, res) => {
             if (err) {
               console.error(err);
               return;
@@ -23,10 +23,11 @@ export default function(agenda, db) {
         agenda.jobs({name: 'GenerateLineupForSlateAndEnterContests'})
         .then(jobs => {
           const slateIdsWithJobs = jobs.map(job => job.attrs.data.id);
+          console.log(jobs);
 
           slatesResponse.data.forEach(slate => {
             if (slateIdsWithJobs.indexOf(slate.id) < 0) {
-  
+              
               const data = {
                 id: slate.id,
               };
