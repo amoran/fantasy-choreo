@@ -46,6 +46,6 @@ mongodb.MongoClient.connect(MONGO_CONN_STR, mongoOptions, function(err, client) 
   (async function() {
     await agenda.start();
     await agenda.every('1 day', 'GetSlates', {sport: 'nfl'});
-    await agenda.every('1 day', 'PullStatistics')
+    // await agenda.every('1 day', 'PullStatistics');
   })();
 });
