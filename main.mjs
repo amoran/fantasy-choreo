@@ -12,6 +12,7 @@ import UpdateRoster from './jobs/UpdateRoster.mjs';
 import UpdateRostersInSlate from './jobs/UpdateRostersInSlate.mjs';
 import PullStatistics from './jobs/PullStatistics.mjs';
 import PullStatisticsByEntry from './jobs/PullStatisticsByEntry.mjs';
+import ReconcileSlateRosters from './jobs/ReconcileSlateRosters.mjs';
 
 const mongoOptions = {
   useNewUrlParser: true,
@@ -42,9 +43,17 @@ mongodb.MongoClient.connect(MONGO_CONN_STR, mongoOptions, function(err, client) 
   UpdateRostersInSlate(agenda, client.db("fantasy"));
   PullStatistics(agenda, client.db("fantasy"));
   PullStatisticsByEntry(agenda, client.db("fantasy"));
+  ReconcileSlateRosters(agenda, client.db("fantasy"));
   
   (async function() {
     await agenda.start();
+    // agenda.now('ReconcileSlateRosters', {slateId: '39577'});
+    // agenda.now('ReconcileSlateRosters', {slateId: '39584'});
+    // agenda.now('ReconcileSlateRosters', {slateId: '39585'});
+    // agenda.now('ReconcileSlateRosters', {slateId: '39587'});
+    // agenda.now('ReconcileSlateRosters', {slateId: '39586'});
+    // agenda.now('ReconcileSlateRosters', {slateId: '39586'});
+    // agenda.now('ReconcileSlateRosters', {slateId: '39693'});
     await agenda.every('1 day', 'GetSlates', {sport: 'nfl'});
     // await agenda.every('1 day', 'PullStatistics');
   })();

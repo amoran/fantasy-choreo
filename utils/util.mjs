@@ -306,7 +306,7 @@ export const addUpdatesToLineup = (availablePlayers, roster, lineupUpdates) => {
     return availablePlayers.find(player => player.id === rosterPlayer.id) === undefined;
   });
 
-  console.log(`For rosterId ${roster.rosterId}, positionUpdates were ${lineupUpdates.players.map(player => player.position)}`);    
+  console.log(`For rosterId ${roster.rosterId}, usedPlayers were ${usedPlayers} and updates were ${lineupUpdates.players}`);    
   
   return usedPlayers.concat(lineupUpdates.players);
 }
