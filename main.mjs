@@ -5,10 +5,11 @@ import mongodb from 'mongodb';
 import { MONGO_CONN_STR } from './constants.mjs';
 
 // JOBS
-import RefreshSlates from './jobs/RefreshSlates';
-import GenerateLineupForSlateAndEnterContests from './jobs/GenerateLineupForSlateAndEnterContests';
-import JoinContestWithLineups from './jobs/JoinContestWithLineups';
+import GetSlates from './jobs/GetSlates';
+import EnterContestsForSlate from './jobs/EnterContestsForSlate';
+import JoinContest from './jobs/JoinContest';
 import UpdateRoster from './jobs/UpdateRoster';
+import UpdateRostersInSlate from './jobs/UpdateRostersInSlate';
 import PullStatistics from './jobs/PullStatistics';
 import PullStatisticsByEntry from './jobs/PullStatisticsByEntry';
 
@@ -34,16 +35,17 @@ mongodb.MongoClient.connect(MONGO_CONN_STR, mongoOptions, function(err, client) 
   app.use('/dash', Agendash(agenda, {title: 'Fantasy Job Dashboard'}));
   app.listen(port, () => console.log(`Fantasy Job Dashboard listening on port ${port}!`));  
   
-  RefreshSlates(agenda, client.db("fantasy"));
-  GenerateLineupForSlateAndEnterContests(agenda, client.db("fantasy"));
-  JoinContestWithLineups(agenda, client.db("fantasy"));
+  GetSlates(agenda, client.db("fantasy"));
+  EnterContestsForSlate(agenda, client.db("fantasy"));
+  JoinContest(agenda, client.db("fantasy"));
   UpdateRoster(agenda, client.db("fantasy"));
+  UpdateRostersInSlate(agenda, client.db("fantasy"));
   PullStatistics(agenda, client.db("fantasy"));
   PullStatisticsByEntry(agenda, client.db("fantasy"));
   
   (async function() {
     await agenda.start();
-    await agenda.every('1 day', 'RefreshSlates', {sport: 'nfl'});
+    await agenda.every('1 day', 'GetSlates', {sport: 'nfl'});
     await agenda.every('1 day', 'PullStatistics')
   })();
 });
