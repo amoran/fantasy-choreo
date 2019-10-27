@@ -49,6 +49,20 @@ export default function(agenda, db) {
                 return;
               }
             });
+          } else {
+            console.log(`(UpdateRoster) Updated roster ${rosterId} for algo ${lineup.algorithm} for lineup ${JSON.stringify(lineup)}`)            
+            
+            let query = {rosterId: rosterId};
+            let update = {
+              $push: {players: lineup.players},
+            };
+  
+            db.collection("entries").updateMany(query, update, function(err, res) {
+              if (err) {
+                console.log(err);
+                return;
+              }
+            });
           }
          
 
