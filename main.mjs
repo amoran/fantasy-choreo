@@ -5,13 +5,13 @@ import mongodb from 'mongodb';
 import { MONGO_CONN_STR } from './constants.mjs';
 
 // JOBS
-import GetSlates from './jobs/GetSlates';
-import EnterContestsForSlate from './jobs/EnterContestsForSlate';
-import JoinContest from './jobs/JoinContest';
-import UpdateRoster from './jobs/UpdateRoster';
-import UpdateRostersInSlate from './jobs/UpdateRostersInSlate';
-import PullStatistics from './jobs/PullStatistics';
-import PullStatisticsByEntry from './jobs/PullStatisticsByEntry';
+import GetSlates from './jobs/GetSlates.mjs';
+import EnterContestsForSlate from './jobs/EnterContestsForSlate.mjs';
+import JoinContest from './jobs/JoinContest.mjs';
+import UpdateRoster from './jobs/UpdateRoster.mjs';
+import UpdateRostersInSlate from './jobs/UpdateRostersInSlate.mjs';
+import PullStatistics from './jobs/PullStatistics.mjs';
+import PullStatisticsByEntry from './jobs/PullStatisticsByEntry.mjs';
 
 const mongoOptions = {
   useNewUrlParser: true,
