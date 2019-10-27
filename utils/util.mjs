@@ -301,11 +301,13 @@ export const getLineupUpdates = (players, usedPositions, algorithm, remainingSal
 }
 
 // 7 - Merge lineup updates with current players list
-export const addUpdatesToLineup = (availablePlayers, rosterPlayers, lineupUpdates) => {
-  let usedPlayers = rosterPlayers.filter(rosterPlayer => {
+export const addUpdatesToLineup = (availablePlayers, roster, lineupUpdates) => {
+  let usedPlayers = roster.players.filter(rosterPlayer => {
     return availablePlayers.find(player => player.id === rosterPlayer.id) === undefined;
   });
 
+  console.log(`For rosterId ${roster.rosterId}, positionUpdates were ${lineupUpdates.players.map(player => player.position)}`);    
+  
   return usedPlayers.concat(lineupUpdates.players);
 }
 

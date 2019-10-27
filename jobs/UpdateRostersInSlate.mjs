@@ -40,7 +40,7 @@ export default function(agenda, db) {
     // 6 - Create new lineup
     for (const roster of rosters) {
       let lineupUpdates = await getLineupUpdates(players, roster.usedPositions, roster.algorithm, roster.remainingSalary);
-      let newLineup = addUpdatesToLineup(players, roster.players, lineupUpdates);
+      let newLineup = addUpdatesToLineup(players, roster, lineupUpdates);
       if (!isSameLineup(newLineup, roster.players)) {
         console.log(`Diff lineup generated for rosterId ${roster.rosterId} and algo ${roster.algorithm}`)
         await updateRoster(agenda, roster.rosterId, newLineup, roster.algorithm);
