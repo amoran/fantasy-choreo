@@ -31,7 +31,7 @@ export const getPlayers = (slateId) => {
       });
 
       // Remove injured players from list
-      players = players.filter(player => {
+      let nonInjuredPlayers = players.filter(player => {
         let playerIsNotInjured = !INJURED_STATUSES.includes((player.injury_status || '').toLowerCase());
         if (!playerIsNotInjured) {
           console.log(`${player.name} is INJURED with ${player.injury_status}`);
@@ -40,11 +40,11 @@ export const getPlayers = (slateId) => {
       });
 
       // Make sure players are swappable
-      players = players.filter(player => {
+      let swappablePlayers = nonInjuredPlayers.filter(player => {
         return player.swappable;
       });
 
-      return players;
+      return swappablePlayers;
     })
     .catch(error => {
       console.error(`(util/getPlayers) error`);
@@ -250,6 +250,7 @@ export const addUsedPositionsToRosters = (rosters, players) => {
     });
 
     let usedPositions = usedPlayers.map(player => player.position);
+    console.log(`For rosterId ${roster.rosterId}, usedPositions was ${usedPositions}`)
 
     return {
       ...roster,
@@ -271,6 +272,8 @@ export const addRemainingSalaryToRosters = (rosters, players, totalSalary) => {
 
     let usedSalaries = usedPlayers.map(player => player.salary);
     let usedTotal = usedSalaries.reduce((acc, salary) => acc + salary, 0);
+
+    console.log(`For rosterId ${roster.rosterId}, remainingSalary was ${totalSalary - usedTotal}`)    
 
     return {
       ...roster,

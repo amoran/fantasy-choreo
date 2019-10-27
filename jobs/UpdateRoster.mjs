@@ -11,12 +11,12 @@ export default function(agenda, db) {
     setTimeout(() => {
         axios.post(`${FANDUEL_WRAPPER_HOST}/rosters/${rosterId}`, lineup)
         .then(response => {
-          console.log(`(UpdateRoster) Updated roster ${rosterId} for algo ${lineup.algorithm} for lineup ${JSON.stringify(lineup)}`)            
 
           
 
           let newRosterId = (((response.data.operations || [])[0] || {}).roster || {}).id;
           if (newRosterId) {
+            console.log(`(UpdateRoster) Updated roster ${rosterId} for algo ${lineup.algorithm} for lineup ${JSON.stringify(lineup)}`)            
             
             let query = {rosterId: rosterId};
             let update = {
@@ -33,6 +33,8 @@ export default function(agenda, db) {
           }
           else if (response.data.entries) {
             console.log('AHHHH OLD CODE WHY');
+            console.log(`(UpdateRoster) Updated roster ${rosterId} for algo ${lineup.algorithm} for lineup ${JSON.stringify(lineup)}`)            
+            
             let updatedEntryIds = response.data.entries.map(entry => entry.id);
             
             let query = {entryId: {$in: updatedEntryIds}};
