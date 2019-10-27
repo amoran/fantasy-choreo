@@ -32,7 +32,11 @@ export const getPlayers = (slateId) => {
 
       // Remove injured players from list
       players = players.filter(player => {
-        return !INJURED_STATUSES.includes((player.injury_status || '').toLowerCase());
+        let playerIsNotInjured = !INJURED_STATUSES.includes((player.injury_status || '').toLowerCase());
+        if (!playerIsNotInjured) {
+          console.log(`${player.name} is INJURED with ${player.injury_status}`);
+        }
+        return playerIsNotInjured;
       });
 
       // Make sure players are swappable
