@@ -55,6 +55,6 @@ mongodb.MongoClient.connect(MONGO_CONN_STR, mongoOptions, function(err, client) 
     // agenda.now('ReconcileSlateRosters', {slateId: '39586'});
     // agenda.now('ReconcileSlateRosters', {slateId: '39693'});
     await agenda.every('1 day', 'GetSlates', {sport: 'nfl'});
-    // await agenda.every('1 day', 'PullStatistics');
+    await agenda.every('1 day', 'PullStatistics');
   })();
 });

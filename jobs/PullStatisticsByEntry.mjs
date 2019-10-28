@@ -10,6 +10,15 @@ export default function(agenda, db) {
     axios.get(`${FANDUEL_WRAPPER_HOST}/entries/${entryId}`)
       .then(entryResponse => {
 
+        if (!entryResponse.data.contests) {
+          // Bad entry
+          db.collection('entries').updateOne({entryId}, {$set: {legacy: true}}, (err, res) => {
+            if (err) throw err;
+  
+            console.log(`(PullStatisticsByEntry) Updated statistics for entryId ${entryId}`);
+          })
+        }
+
         if (!entryResponse.data.contests[0].final) {
           // Contest is not over yet, don't save result.
           return;

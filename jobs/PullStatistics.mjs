@@ -6,19 +6,24 @@ export default function(agenda, db) {
     console.log(`(PullStatistics) Finding Entries needing stats`);
 
     db.collection('entries').find({
-      $or: [{
-        result: {
-          $exists: false
+      $and: [
+        {
+          $or: [
+            {result: {$exists: false}},
+            {'result.score': {$exists: false}}
+          ]
+        }, {
+          $or: [
+            {legacy: {$exists: false}},
+            {legacy: false}
+          ]
+        }, {
+          entryId: {
+            $exists: true,
+            $ne: null
+          },
         }
-      }, {
-        'result.score': {
-          $exists: false
-        }
-      }],
-      entryId: {
-        $exists: true,
-        $ne: null
-      }
+      ],
     }).toArray((err, result) => {
       if (err) throw err;
 
