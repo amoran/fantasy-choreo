@@ -52,6 +52,58 @@ export const getPlayers = (slateId) => {
     });
 };
 
+// HOTFIX
+export const getAllPlayers = (slateId) => {
+  return axios.get(`${FANDUEL_WRAPPER_HOST}/slates/${slateId}/players`)
+    .then(playersResponse => {
+
+      // Clean up the fppg field and add the name field.
+      let players = playersResponse.data.map(player => {
+        return {
+          ...player,
+          fppg: player.fppg || 0,
+          name: `${player.first_name} ${player.last_name}`
+        }
+      });
+
+      return players;
+    })
+    .catch(error => {
+      console.error(`(util/getPlayers) error`);
+      console.error(error);
+    });
+};
+
+// HOTFIX
+export const filterNonSwappablePlayers = (players) => {
+  // Make sure players are swappable
+  let swappablePlayers = players.filter(player => {
+    return player.swappable;
+  });
+
+  return swappablePlayers;
+}
+
+// HOTFIX
+export const filterValuablePlayers = (players) => {
+  // Remove injured players from list
+  let nonInjuredPlayers = players.filter(player => {
+    let playerIsNotInjured = !INJURED_STATUSES.includes((player.injury_status || '').toLowerCase());
+    if (!playerIsNotInjured) {
+      console.log(`${player.name} is INJURED with ${player.injury_status}`);
+    }
+    return playerIsNotInjured;
+  });
+
+  // Make sure players are swappable
+  let swappablePlayers = nonInjuredPlayers.filter(player => {
+    return player.swappable;
+  });
+
+  return swappablePlayers;
+}
+
+
 
 // 2 - Get lineups for each algo. 
 export const getLineups = (players) => {

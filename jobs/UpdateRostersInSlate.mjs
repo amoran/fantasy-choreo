@@ -1,5 +1,7 @@
 import {
-  getPlayers,
+  getAllPlayers,
+  filterNonSwappablePlayers,
+  filterValidPlayers,
   getEntriesFromDb,
   getRostersForEntries,
   addUsedPositionsToRosters,
@@ -18,8 +20,16 @@ export default function(agenda, db) {
     console.log(`(UpdateRostersInSlate) Updating rosters for slateId ${slateId} with totalSalary ${totalSalary}`);
 
     // 1 - Get swappable and uninjured players
-    let players = await getPlayers(slateId);
-    players === undefined ? console.log(`getPlayers returned undefined obj`) : '';
+    let allPlayers = await getAllPlayers(slateId);
+    allPlayers === undefined ? console.log(`getPlayers returned undefined obj`) : '';
+
+    // Filter out non swappable players
+    let swappablePlayers = filterNonSwappablePlayers(allPlayers);
+    swappablePlayers === undefined ? console.log(`filterNonSwappablePlayers returned undefined obj`) : '';
+
+    // Filter swappable players
+    let players = filterValidPlayers(allPlayers);
+    players === undefined ? console.log(`filterValidPlayers returned undefined obj`) : '';
     
     // 2 - Get entries from db
     let entries = await getEntriesFromDb(db, slateId);
@@ -30,7 +40,7 @@ export default function(agenda, db) {
     rosters === undefined ? console.log(`getRostersForEntries returned undefined obj`) : '';
     
     // 4 - Add used positions to rosters. rosters = [{rosterId, algorithm, players, usedPositions}]
-    rosters = addUsedPositionsToRosters(rosters, players);
+    rosters = addUsedPositionsToRosters(rosters, swappablePlayers);
     rosters === undefined ? console.log(`addUsedPositionsToRosters returned undefined obj`) : '';
     
     // 5 - Add remaining salary to rosters. rosters = [{rosterId, algorithm, players, usedPositions, remainingSalary}]
@@ -39,8 +49,14 @@ export default function(agenda, db) {
     
     // 6 - Create new lineup
     for (const roster of rosters) {
+
+      // Get lineup updates from lineup generator API
       let lineupUpdates = await getLineupUpdates(players, roster.usedPositions, roster.algorithm, roster.remainingSalary);
+
+      // Combine updates with existing lineup to get new one
       let newLineup = addUpdatesToLineup(players, roster, lineupUpdates);
+
+      // Update the roster if a new lineup was generated
       if (!isSameLineup(newLineup, roster.players)) {
         console.log(`Diff lineup generated for rosterId ${roster.rosterId} and algo ${roster.algorithm}`)
         await updateRoster(agenda, roster.rosterId, newLineup, roster.algorithm);
