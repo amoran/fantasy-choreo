@@ -54,7 +54,7 @@ export default function(agenda, db) {
       let lineupUpdates = await getLineupUpdates(players, roster.usedPositions, roster.algorithm, roster.remainingSalary);
 
       // Combine updates with existing lineup to get new one
-      let newLineup = addUpdatesToLineup(players, roster, lineupUpdates);
+      let newLineup = addUpdatesToLineup(swappablePlayers, roster, lineupUpdates);
 
       // Update the roster if a new lineup was generated
       if (!isSameLineup(newLineup, roster.players)) {
