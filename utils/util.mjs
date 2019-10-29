@@ -85,7 +85,7 @@ export const filterNonSwappablePlayers = (players) => {
 }
 
 // HOTFIX
-export const filterValuablePlayers = (players) => {
+export const filterValidPlayers = (players) => {
   // Remove injured players from list
   let nonInjuredPlayers = players.filter(player => {
     let playerIsNotInjured = !INJURED_STATUSES.includes((player.injury_status || '').toLowerCase());
