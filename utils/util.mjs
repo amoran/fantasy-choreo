@@ -130,31 +130,33 @@ export const filterContests = (contests) => {
     );
   });
 
-  // Retry filtering with 50cents as max entry_fee.
+  // Retry filtering with non monetary prize as option.
   if (filteredContests.length === 0) {
     filteredContests = contests.filter(contest => {
       let isFull = contest.entries.count < contest.size.max;
       let isLargeContest = contest.size.max > 100;
-      let isLowCost = contest.entry_fee <= 0.50;
+      let isLowCost = contest.entry_fee <= 0.25;
       let isNotRestricted = contest.restricted === false;
-      let isMonetaryPrize = contest.prizes.total > 0;
   
       return (
         isFull && 
         isLargeContest && 
         isLowCost && 
-        isNotRestricted && 
-        isMonetaryPrize
+        isNotRestricted 
       );
     });
   }
 
-  // Choose contest with highest prize size.
+  // Choose contest with lowest entry cost
   return filteredContests.sort((contest1, contest2) => {
-    let prizeSize1 = contest1.prizes.total;
-    let prizeSize2 = contest2.prizes.total;
+    // Off right now: highest prize
+    // let prizeSize1 = contest1.prizes.total;
+    // let prizeSize2 = contest2.prizes.total;
+    // return prizeSize1 < prizeSize2;
 
-    return prizeSize1 < prizeSize2;
+    let entryCost1 = contest1.entry_fee;
+    let entryCost2 = contest2.entry_fee;
+    return entryCost1 > entryCost2;
   })[0];
 }
 
