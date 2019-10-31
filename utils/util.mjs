@@ -134,7 +134,7 @@ export const filterContests = (contests) => {
   if (filteredContests.length === 0) {
     filteredContests = contests.filter(contest => {
       let isFull = contest.entries.count < contest.size.max;
-      let isLargeContest = contest.size.max > 100;
+      let isLargeContest = contest.size.max >= 100;
       let isLowCost = contest.entry_fee <= 0.25;
       let isNotRestricted = contest.restricted === false;
   
