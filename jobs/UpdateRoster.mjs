@@ -24,7 +24,7 @@ export default function(agenda, db) {
               $set: {rosterId: newRosterId}
             };
   
-            db.collection("entries").updateMany(query, update, function(err, res) {
+            db.collection("entries2").updateMany(query, update, function(err, res) {
               if (err) {
                 console.log(err);
                 return;
@@ -43,7 +43,7 @@ export default function(agenda, db) {
               $set: {rosterId: rosterId}
             };
   
-            db.collection("entries").updateMany(query, update, function(err, res) {
+            db.collection("entries2").updateMany(query, update, function(err, res) {
               if (err) {
                 console.log(err);
                 return;
@@ -57,7 +57,7 @@ export default function(agenda, db) {
               $push: {players: lineup.players},
             };
   
-            db.collection("entries").updateMany(query, update, function(err, res) {
+            db.collection("entries2").updateMany(query, update, function(err, res) {
               if (err) {
                 console.log(err);
                 return;

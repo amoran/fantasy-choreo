@@ -2,9 +2,14 @@ import {FANDUEL_WRAPPER_HOST, LINEUP_API_HOST, INJURED_STATUSES} from '../consta
 import {
   getSlateDetails,
   getPlayers,
+  filterOutNonSwappablePlayers,
+  filterOutInjuredPlayers,
   getLineups,
   getContests,
+  filterContests,
   getEntriesFromDb,
+  getUnenteredAlgos,
+  enterLineupsToContest,
   getUnenteredAlgoContestCombos,
   enterAlgoContestCombos,
   getGameStartTimes,
@@ -24,32 +29,41 @@ export default function(agenda, db) {
     // 1 - Get swappable and uninjured players
     let players = await getPlayers(slateId);
     players === undefined ? console.log(`getPlayers returned undefined obj`) : '';
+
+    // 2 - Filter players
+    players = filterOutNonSwappablePlayers(players);
+    players = filterOutInjuredPlayers(players);
     
-    // 2 - Get lineups for each algo. 
+    // 3 - Get lineups for each algo. 
     let lineups = await getLineups(players);
     lineups === undefined ? console.log(`getLineups returned undefined obj`) : '';
     
-    // 3 - Get all contests for this slate (entered or not)
+    // 4 - Get all contests for this slate (entered or not)
     let contests = await getContests(db, slateId);
     contests === undefined ? console.log(`getContests returned undefined obj`) : '';
+
+    // 4.5 - Filter contests
+    let theContest = filterContests(contests);
+    theContest === undefined ? console.log(`filterContests returned undefined obj`) : '';
     
-    // 4 - Get entries from db
+    // // 5 - Get entries from db
     let entries = await getEntriesFromDb(db, slateId);
     entries === undefined ? console.log(`getEntriesFromDb returned undefined obj`) : '';
+
+    // 6 Get unentered algorithms
+    let unenteredAlgos = getUnenteredAlgos(slateId, lineups, entries);
+    unenteredAlgos === undefined ? console.log(`getUnenteredAlgos returned undefined obj`) : '';
     
-    // 5 - Get unentered algo/contest combos
-    let unenteredAlgoContestCombos = await getUnenteredAlgoContestCombos(lineups, contests, entries);
-    unenteredAlgoContestCombos === undefined ? console.log(`getUnenteredAlgoContestCombos returned undefined obj`) : '';
-    unenteredAlgoContestCombos && unenteredAlgoContestCombos.length === 0 ? console.log(`(EnterContestsForSlate) No contests to enter for slate with id ${slateId}`) : '';
+    // 7 Enter algos into contest
+    if (theContest !== undefined) {
+      await enterLineupsToContest(agenda, unenteredAlgos, theContest);
+    }
 
-    // 6 - Enter Algo/contest Combos
-    await enterAlgoContestCombos(agenda, unenteredAlgoContestCombos);
-
-    // 7 - Get game start times for this slate
+    // 8 - Get game start times for this slate
     let startTimes = await getGameStartTimes(slate.fixtures);
     startTimes === undefined ? console.log(`getGameStartTimes returned undefined obj`) : '';
     
-    // 8 - Schedule Updates for slate
+    // 9 - Schedule Updates for slate
     await scheduleSlatewideRostersUpdates(agenda, slate, startTimes);
 
   });

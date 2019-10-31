@@ -16,44 +16,8 @@ export const getSlateDetails = (slateId) => {
 };
 
 
-// 1 - Get swappable and uninjured players
+// 1 - Get ALL Players
 export const getPlayers = (slateId) => {
-  return axios.get(`${FANDUEL_WRAPPER_HOST}/slates/${slateId}/players`)
-    .then(playersResponse => {
-
-      // Clean up the fppg field and add the name field.
-      let players = playersResponse.data.map(player => {
-        return {
-          ...player,
-          fppg: player.fppg || 0,
-          name: `${player.first_name} ${player.last_name}`
-        }
-      });
-
-      // Remove injured players from list
-      let nonInjuredPlayers = players.filter(player => {
-        let playerIsNotInjured = !INJURED_STATUSES.includes((player.injury_status || '').toLowerCase());
-        if (!playerIsNotInjured) {
-          console.log(`${player.name} is INJURED with ${player.injury_status}`);
-        }
-        return playerIsNotInjured;
-      });
-
-      // Make sure players are swappable
-      let swappablePlayers = nonInjuredPlayers.filter(player => {
-        return player.swappable;
-      });
-
-      return swappablePlayers;
-    })
-    .catch(error => {
-      console.error(`(util/getPlayers) error`);
-      console.error(error);
-    });
-};
-
-// HOTFIX
-export const getAllPlayers = (slateId) => {
   return axios.get(`${FANDUEL_WRAPPER_HOST}/slates/${slateId}/players`)
     .then(playersResponse => {
 
@@ -74,8 +38,8 @@ export const getAllPlayers = (slateId) => {
     });
 };
 
-// HOTFIX
-export const filterNonSwappablePlayers = (players) => {
+// Remove Non swappable players
+export const filterOutNonSwappablePlayers = (players) => {
   // Make sure players are swappable
   let swappablePlayers = players.filter(player => {
     return player.swappable;
@@ -84,25 +48,19 @@ export const filterNonSwappablePlayers = (players) => {
   return swappablePlayers;
 }
 
-// HOTFIX
-export const filterValidPlayers = (players) => {
+// Remove injured players
+export const filterOutInjuredPlayers = (players) => {
   // Remove injured players from list
   let nonInjuredPlayers = players.filter(player => {
     let playerIsNotInjured = !INJURED_STATUSES.includes((player.injury_status || '').toLowerCase());
-    if (!playerIsNotInjured) {
-      console.log(`${player.name} is INJURED with ${player.injury_status}`);
-    }
+    // if (!playerIsNotInjured) {
+    //   console.log(`${player.name} is INJURED with ${player.injury_status}`);
+    // }
     return playerIsNotInjured;
   });
 
-  // Make sure players are swappable
-  let swappablePlayers = nonInjuredPlayers.filter(player => {
-    return player.swappable;
-  });
-
-  return swappablePlayers;
+  return nonInjuredPlayers;
 }
-
 
 
 // 2 - Get lineups for each algo. 
@@ -128,7 +86,9 @@ export const getLineups = (players) => {
 
 // 3 - Get all contests for this slate (entered or not)
 export const getContests = (db, slateId) => {
-  return axios.get(`${FANDUEL_WRAPPER_HOST}/slates/${slateId}/contests`)
+  let contestTypes = 'TOURNAMENT'; //comma separated list
+
+  return axios.get(`${FANDUEL_WRAPPER_HOST}/slates/${slateId}/contests?type=${contestTypes}`)
     .then(contestsResponse => {
 
       // Upsert all contests to db for future reference
@@ -150,10 +110,58 @@ export const getContests = (db, slateId) => {
     });
 };
 
+export const filterContests = (contests) => {
+
+  let filteredContests = [];
+  
+  filteredContests = contests.filter(contest => {
+    let isFull = contest.entries.count < contest.size.max;
+    let isLargeContest = contest.size.max > 100;
+    let isLowCost = contest.entry_fee <= 0.25;
+    let isNotRestricted = contest.restricted === false;
+    let isMonetaryPrize = contest.prizes.total > 0;
+
+    return (
+      isFull && 
+      isLargeContest && 
+      isLowCost && 
+      isNotRestricted && 
+      isMonetaryPrize
+    );
+  });
+
+  // Retry filtering with 50cents as max entry_fee.
+  if (filteredContests.length === 0) {
+    filteredContests = contests.filter(contest => {
+      let isFull = contest.entries.count < contest.size.max;
+      let isLargeContest = contest.size.max > 100;
+      let isLowCost = contest.entry_fee <= 0.50;
+      let isNotRestricted = contest.restricted === false;
+      let isMonetaryPrize = contest.prizes.total > 0;
+  
+      return (
+        isFull && 
+        isLargeContest && 
+        isLowCost && 
+        isNotRestricted && 
+        isMonetaryPrize
+      );
+    });
+  }
+
+  // Choose contest with highest prize size.
+  return filteredContests.sort((contest1, contest2) => {
+    let prizeSize1 = contest1.prizes.total;
+    let prizeSize2 = contest2.prizes.total;
+
+    return prizeSize1 < prizeSize2;
+  })[0];
+}
+
 
 // 4 - Get entries from db
 export const getEntriesFromDb = (db, slateId) => {
-  return db.collection('entries').find({slateId: slateId}).toArray()
+  return db.collection('entries2').find({slateId: slateId}).toArray()
     .then(res => {
       return res;
     })
@@ -164,6 +172,33 @@ export const getEntriesFromDb = (db, slateId) => {
       }             
     });
 };
+
+
+// Get lineups whose algorithm has not been entered into a contest in this slate.
+export const getUnenteredAlgos = (slateid, lineups, entries) => {
+  let algos = lineups.map(lineup => lineup.algorithm);
+  let entriesForThisSlate = entries.filter(entry => entry.slateId === slateid);
+  let algosEntered = entriesForThisSlate.map(entry => entry.algorithm);
+
+  let unenteredAlgos = algos.filter(algo => {
+    return !algosEntered.includes(algo);
+  });
+
+  return unenteredAlgos.map(algo => {
+    return lineups.find(lineup => lineup.algorithm === algo);
+  });
+}
+
+
+export const enterLineupsToContest = (agenda, unenteredLineups, theContest) => {
+  unenteredLineups.forEach(lineup => {
+    console.log(`Entering contest ${theContest.id} for lineup ${lineup.algorithm}`);
+    agenda.now('JoinContest', {
+      contestId: theContest.id,
+      lineup
+    });
+  });
+}
 
 
 // 5 - Get unentered algo/contest combos

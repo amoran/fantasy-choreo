@@ -12,7 +12,7 @@ export default function(agenda, db) {
 
         if (!entryResponse.data.contests) {
           // Bad entry
-          db.collection('entries').updateOne({entryId}, {$set: {legacy: true}}, (err, res) => {
+          db.collection('entries2').updateOne({entryId}, {$set: {legacy: true}}, (err, res) => {
             if (err) throw err;
   
             console.log(`(PullStatisticsByEntry) Updated statistics for entryId ${entryId}`);
@@ -34,7 +34,7 @@ export default function(agenda, db) {
         };
 
         //Put the data in the db.
-        db.collection('entries').updateOne({entryId}, {$set: {result}}, (err, res) => {
+        db.collection('entries2').updateOne({entryId}, {$set: {result}}, (err, res) => {
           if (err) throw err;
 
           console.log(`(PullStatisticsByEntry) Updated statistics for entryId ${entryId}`);

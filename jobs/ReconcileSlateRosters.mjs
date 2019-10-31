@@ -48,7 +48,7 @@ export default function(agenda, db) {
           });
 
           entryRosters.forEach(entry => {
-            db.collection('entries').findOne({entryId: entry.entryId})
+            db.collection('entries2').findOne({entryId: entry.entryId})
               .then(data => {
                 let currentLineup = data.players[data.players.length - 1];
                 let fanduelLineup = fanduelRosters.find(roster => roster.id == entry.rosterId).lineup;
@@ -72,7 +72,7 @@ export default function(agenda, db) {
                     }
                   }
 
-                  db.collection("entries").updateOne(query, update, function(err, res) {
+                  db.collection("entries2").updateOne(query, update, function(err, res) {
                     if (err) {
                       console.log(err);
                       return;

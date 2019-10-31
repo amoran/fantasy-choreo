@@ -5,7 +5,7 @@ export default function(agenda, db) {
 
     console.log(`(PullStatistics) Finding Entries needing stats`);
 
-    db.collection('entries').find({
+    db.collection('entries2').find({
       $and: [
         {
           $or: [

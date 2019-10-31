@@ -1,7 +1,7 @@
 import {
-  getAllPlayers,
-  filterNonSwappablePlayers,
-  filterValidPlayers,
+  getPlayers,
+  filterOutNonSwappablePlayers,
+  filterOutInjuredPlayers,
   getEntriesFromDb,
   getRostersForEntries,
   addUsedPositionsToRosters,
@@ -20,38 +20,39 @@ export default function(agenda, db) {
     console.log(`(UpdateRostersInSlate) Updating rosters for slateId ${slateId} with totalSalary ${totalSalary}`);
 
     // 1 - Get swappable and uninjured players
-    let allPlayers = await getAllPlayers(slateId);
-    allPlayers === undefined ? console.log(`getPlayers returned undefined obj`) : '';
+    let players = await getPlayers(slateId);
+    players === undefined ? console.log(`getPlayers returned undefined obj`) : '';
 
     // Filter out non swappable players
-    let swappablePlayers = filterNonSwappablePlayers(allPlayers);
-    swappablePlayers === undefined ? console.log(`filterNonSwappablePlayers returned undefined obj`) : '';
+    let swappablePlayers = filterOutNonSwappablePlayers(players);
+    swappablePlayers === undefined ? console.log(`filterOutNonSwappablePlayers returned undefined obj`) : '';
 
-    // Filter swappable players
-    let players = filterValidPlayers(allPlayers);
-    players === undefined ? console.log(`filterValidPlayers returned undefined obj`) : '';
+    // Filter out injured players
+    let usablePlayers = filterOutInjuredPlayers(swappablePlayers);
+    usablePlayers === undefined ? console.log(`filterOutInjuredPlayers returned undefined obj`) : '';
     
     // 2 - Get entries from db
     let entries = await getEntriesFromDb(db, slateId);
-    entries === undefined ? console.log(`getEntriesFromDb returned undefined obj`) : '';
+    entries === undefined ? console.log(`getEntriesFromDb returned undefined obj`) : '';    
     
     // 3 - Get rosters for entries (deduped). rosters = [{rosterId, algorithm, players}]
     let rosters = getRostersForEntries(entries);
-    rosters === undefined ? console.log(`getRostersForEntries returned undefined obj`) : '';
+    rosters === undefined ? console.log(`getRostersForEntries returned undefined obj`) : '';    
     
     // 4 - Add used positions to rosters. rosters = [{rosterId, algorithm, players, usedPositions}]
     rosters = addUsedPositionsToRosters(rosters, swappablePlayers);
     rosters === undefined ? console.log(`addUsedPositionsToRosters returned undefined obj`) : '';
     
     // 5 - Add remaining salary to rosters. rosters = [{rosterId, algorithm, players, usedPositions, remainingSalary}]
-    rosters = addRemainingSalaryToRosters(rosters, players, totalSalary);
+    rosters = addRemainingSalaryToRosters(rosters, swappablePlayers, totalSalary);
     rosters === undefined ? console.log(`addRemainingSalaryToRosters returned undefined obj`) : '';
     
+
     // 6 - Create new lineup
     for (const roster of rosters) {
 
       // Get lineup updates from lineup generator API
-      let lineupUpdates = await getLineupUpdates(players, roster.usedPositions, roster.algorithm, roster.remainingSalary);
+      let lineupUpdates = await getLineupUpdates(usablePlayers, roster.usedPositions, roster.algorithm, roster.remainingSalary);
 
       // Combine updates with existing lineup to get new one
       let newLineup = addUpdatesToLineup(swappablePlayers, roster, lineupUpdates);
