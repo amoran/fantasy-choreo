@@ -120,13 +120,15 @@ export const filterContests = (contests) => {
     let isLowCost = contest.entry_fee <= 0.25;
     let isNotRestricted = contest.restricted === false;
     let isMonetaryPrize = contest.prizes.total > 0;
+    let canEnterAllLineups = contest.max_entries_per_user >= 9;
 
     return (
       isFull && 
       isLargeContest && 
       isLowCost && 
       isNotRestricted && 
-      isMonetaryPrize
+      isMonetaryPrize &&
+      canEnterAllLineups
     );
   });
 
@@ -134,15 +136,17 @@ export const filterContests = (contests) => {
   if (filteredContests.length === 0) {
     filteredContests = contests.filter(contest => {
       let isFull = contest.entries.count < contest.size.max;
-      let isLargeContest = contest.size.max >= 70;
+      let isLargeContest = contest.size.max >= 100;
       let isLowCost = contest.entry_fee <= 0.25;
       let isNotRestricted = contest.restricted === false;
-  
+      let canEnterAllLineups = contest.max_entries_per_user >= 9;
+      
       return (
         isFull && 
         isLargeContest && 
         isLowCost && 
-        isNotRestricted 
+        isNotRestricted &&
+        canEnterAllLineups
       );
     });
   }
