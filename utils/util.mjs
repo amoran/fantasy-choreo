@@ -404,7 +404,7 @@ export const getLineupUpdates = (players, usedPositions, algorithm, remainingSal
 }
 
 // 7 - Merge lineup updates with current players list
-export const addUpdatesToLineup = (availablePlayers, roster, lineupUpdates) => {
+export const addUpdatesToLineup = (players, roster, lineupUpdates) => {
   let usedPlayers = roster.players.filter(rosterPlayer => {
     let foundPlayer = players.find(player => player.id === rosterPlayer.id);
     return foundPlayer && foundPlayer.swappable === false;
