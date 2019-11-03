@@ -339,7 +339,8 @@ export const addUsedPositionsToRosters = (rosters, players) => {
   // if a player in a roster is not in the players list, they must have been used already.
   return rosters.map(roster => {
     let usedPlayers = roster.players.filter(rosterPlayer => {
-      return players.find(player => player.id === rosterPlayer.id) === undefined;
+      let foundPlayer = players.find(player => player.id === rosterPlayer.id);
+      return foundPlayer && foundPlayer.swappable === false;
     });
 
     let usedPositions = usedPlayers.map(player => player.position);
@@ -360,7 +361,8 @@ export const addRemainingSalaryToRosters = (rosters, players, totalSalary) => {
   // if a player in a roster is not in the players list, they must have been used already.
   return rosters.map(roster => {
     let usedPlayers = roster.players.filter(rosterPlayer => {
-      return players.find(player => player.id === rosterPlayer.id) === undefined;
+      let foundPlayer = players.find(player => player.id === rosterPlayer.id);
+      return foundPlayer && foundPlayer.swappable === false;
     });
 
     let usedSalaries = usedPlayers.map(player => player.salary);
@@ -379,8 +381,16 @@ export const addRemainingSalaryToRosters = (rosters, players, totalSalary) => {
 
 // 6 - Get Lineup Updates
 export const getLineupUpdates = (players, usedPositions, algorithm, remainingSalary) => {
+  // Filter out non swappable players
+  let swappablePlayers = filterOutNonSwappablePlayers(players);
+  swappablePlayers === undefined ? console.log(`filterOutNonSwappablePlayers returned undefined obj`) : '';
+
+  // Filter out injured players
+  let availablePlayers = filterOutInjuredPlayers(swappablePlayers);
+  availablePlayers === undefined ? console.log(`filterOutInjuredPlayers returned undefined obj`) : '';
+
   return axios.post(`${LINEUP_API_HOST}/api/lineup/${algorithm}`, {
-    available: players,
+    available: availablePlayers,
     usedPositions,
     remainingSalary
   })
@@ -396,7 +406,8 @@ export const getLineupUpdates = (players, usedPositions, algorithm, remainingSal
 // 7 - Merge lineup updates with current players list
 export const addUpdatesToLineup = (availablePlayers, roster, lineupUpdates) => {
   let usedPlayers = roster.players.filter(rosterPlayer => {
-    return availablePlayers.find(player => player.id === rosterPlayer.id) === undefined;
+    let foundPlayer = players.find(player => player.id === rosterPlayer.id);
+    return foundPlayer && foundPlayer.swappable === false;
   });
 
   console.log(`For rosterId ${roster.rosterId}, usedPlayers were ${JSON.stringify(usedPlayers)} and updates were ${JSON.stringify(lineupUpdates.players)}`);    

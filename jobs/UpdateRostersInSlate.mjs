@@ -22,14 +22,6 @@ export default function(agenda, db) {
     // 1 - Get swappable and uninjured players
     let players = await getPlayers(slateId);
     players === undefined ? console.log(`getPlayers returned undefined obj`) : '';
-
-    // Filter out non swappable players
-    let swappablePlayers = filterOutNonSwappablePlayers(players);
-    swappablePlayers === undefined ? console.log(`filterOutNonSwappablePlayers returned undefined obj`) : '';
-
-    // Filter out injured players
-    let usablePlayers = filterOutInjuredPlayers(swappablePlayers);
-    usablePlayers === undefined ? console.log(`filterOutInjuredPlayers returned undefined obj`) : '';
     
     // 2 - Get entries from db
     let entries = await getEntriesFromDb(db, slateId);
@@ -40,11 +32,11 @@ export default function(agenda, db) {
     rosters === undefined ? console.log(`getRostersForEntries returned undefined obj`) : '';    
     
     // 4 - Add used positions to rosters. rosters = [{rosterId, algorithm, players, usedPositions}]
-    rosters = addUsedPositionsToRosters(rosters, swappablePlayers);
+    rosters = addUsedPositionsToRosters(rosters, players);
     rosters === undefined ? console.log(`addUsedPositionsToRosters returned undefined obj`) : '';
     
     // 5 - Add remaining salary to rosters. rosters = [{rosterId, algorithm, players, usedPositions, remainingSalary}]
-    rosters = addRemainingSalaryToRosters(rosters, swappablePlayers, totalSalary);
+    rosters = addRemainingSalaryToRosters(rosters, players, totalSalary);
     rosters === undefined ? console.log(`addRemainingSalaryToRosters returned undefined obj`) : '';
     
 
@@ -52,10 +44,10 @@ export default function(agenda, db) {
     for (const roster of rosters) {
 
       // Get lineup updates from lineup generator API
-      let lineupUpdates = await getLineupUpdates(usablePlayers, roster.usedPositions, roster.algorithm, roster.remainingSalary);
+      let lineupUpdates = await getLineupUpdates(players, roster.usedPositions, roster.algorithm, roster.remainingSalary);
 
       // Combine updates with existing lineup to get new one
-      let newLineup = addUpdatesToLineup(swappablePlayers, roster, lineupUpdates);
+      let newLineup = addUpdatesToLineup(players, roster, lineupUpdates);
 
       // Update the roster if a new lineup was generated
       if (!isSameLineup(newLineup, roster.players)) {
