@@ -50,12 +50,8 @@ export const filterOutNonSwappablePlayers = (players) => {
 
 // Remove injured players
 export const filterOutInjuredPlayers = (players) => {
-  // Remove injured players from list
   let nonInjuredPlayers = players.filter(player => {
     let playerIsNotInjured = !INJURED_STATUSES.includes((player.injury_status || '').toLowerCase());
-    // if (!playerIsNotInjured) {
-    //   console.log(`${player.name} is INJURED with ${player.injury_status}`);
-    // }
     return playerIsNotInjured;
   });
 
@@ -64,8 +60,9 @@ export const filterOutInjuredPlayers = (players) => {
 
 
 // 2 - Get lineups for each algo. 
-export const getLineups = (players) => {
-  return axios.post(`${LINEUP_API_HOST}/api/lineup`, players)
+export const getLineups = (players, sport) => {
+  sport = sport || 'nfl';
+  return axios.post(`${LINEUP_API_HOST}/api/${sport}/lineup`, players)
     .then(lineupResponse => {
 
       // Make sure lineups have all 9 players in them.
@@ -115,7 +112,7 @@ export const filterContests = (contests) => {
   let filteredContests = [];
   
   filteredContests = contests.filter(contest => {
-    let isFull = contest.entries.count < contest.size.max;
+    let isNotFull = contest.entries.count < contest.size.max;
     let isLargeContest = contest.size.max > 100;
     let isLowCost = contest.entry_fee <= 0.25;
     let isNotRestricted = contest.restricted === false;
@@ -123,7 +120,7 @@ export const filterContests = (contests) => {
     let canEnterAllLineups = contest.max_entries_per_user >= 9;
 
     return (
-      isFull && 
+      isNotFull && 
       isLargeContest && 
       isLowCost && 
       isNotRestricted && 
@@ -135,14 +132,14 @@ export const filterContests = (contests) => {
   // Retry filtering with non monetary prize as option.
   if (filteredContests.length === 0) {
     filteredContests = contests.filter(contest => {
-      let isFull = contest.entries.count < contest.size.max;
+      let isNotFull = contest.entries.count < contest.size.max;
       let isLargeContest = contest.size.max >= 100;
       let isLowCost = contest.entry_fee <= 0.25;
       let isNotRestricted = contest.restricted === false;
       let canEnterAllLineups = contest.max_entries_per_user >= 9;
       
       return (
-        isFull && 
+        isNotFull && 
         isLargeContest && 
         isLowCost && 
         isNotRestricted &&

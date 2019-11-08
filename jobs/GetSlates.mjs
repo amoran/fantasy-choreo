@@ -6,7 +6,7 @@ export default function(agenda, db) {
     const {sport} = job.attrs.data;
     console.log(`(GetSlates) Getting slates for ${sport}`);
 
-    axios.get(`${FANDUEL_WRAPPER_HOST}/slates/${sport}`)
+    axios.get(`${FANDUEL_WRAPPER_HOST}/slates?sport=${sport}`)
       .then(slatesResponse => {
         const slateIds = slatesResponse.data.map(slate => slate.id);
 
@@ -21,7 +21,7 @@ export default function(agenda, db) {
         });
 
         slatesResponse.data.forEach(slate => {
-          agenda.now('EnterContestsForSlate', {slate: slate});
+          agenda.now('EnterContestsForSlate', {slate: slate, sport: sport});
         });
 
       });

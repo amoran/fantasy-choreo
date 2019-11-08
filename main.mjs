@@ -26,16 +26,22 @@ mongodb.MongoClient.connect(MONGO_CONN_STR, mongoOptions, function(err, client) 
   }
   console.log(`Connected successfully to MongoDB: ${MONGO_CONN_STR}`);
 
-  // Start Agenda
-  let agendaDb = process.env.PORT ? "fantasy" : "tempfantasy";
-  const agenda = new Agenda({mongo: client.db(agendaDb)});
-
-  // Start agenda dashboard
+  // Start express
   var app = express();
   const port = process.env.PORT || 80;
-  app.use('/dash', Agendash(agenda, {title: 'Fantasy Job Dashboard'}));
-  app.listen(port, () => console.log(`Fantasy Job Dashboard listening on port ${port}!`));  
+
+  // Start Agenda
+  let agendaDb = process.env.PORT ? "fantasy" : "tempfantasy";
+  let agendaDbNba = process.env.PORT ? "fantasynba" : "tempfantasynba";
   
+  const agenda = new Agenda({mongo: client.db(agendaDb)});
+  const agendaNba = new Agenda({mongo: client.db(agendaDbNba)});
+  
+  // Start agenda dashboard
+  app.use('/nfl', Agendash(agenda, {title: 'NFL Jobs'}));
+  app.use('/nba', Agendash(agendaNba, {title: 'NBA Jobs'}));
+  
+  // Create NFL Jobs
   GetSlates(agenda, client.db("fantasy"));
   EnterContestsForSlate(agenda, client.db("fantasy"));
   JoinContest(agenda, client.db("fantasy"));
@@ -44,17 +50,26 @@ mongodb.MongoClient.connect(MONGO_CONN_STR, mongoOptions, function(err, client) 
   PullStatistics(agenda, client.db("fantasy"));
   PullStatisticsByEntry(agenda, client.db("fantasy"));
   ReconcileSlateRosters(agenda, client.db("fantasy"));
+
+  // Create NBA Jobs
+  GetSlates(agendaNba, client.db("fantasynba"));
+  EnterContestsForSlate(agendaNba, client.db("fantasynba"));
   
+  // Start Express listening
+  app.listen(port, () => console.log(`Jobs Dashboards listening on port ${port}!`));  
+    
+  // Start Jobs
   (async function() {
+    
+    // NFL
     await agenda.start();
-    // agenda.now('ReconcileSlateRosters', {slateId: '39858'});
-    // agenda.now('ReconcileSlateRosters', {slateId: '39584'});
-    // agenda.now('ReconcileSlateRosters', {slateId: '39585'});
-    // agenda.now('ReconcileSlateRosters', {slateId: '39587'});
-    // agenda.now('ReconcileSlateRosters', {slateId: '39586'});
-    // agenda.now('ReconcileSlateRosters', {slateId: '39586'});
-    // agenda.now('ReconcileSlateRosters', {slateId: '39693'});
     await agenda.every('1 day', 'GetSlates', {sport: 'nfl'});
     await agenda.every('1 day', 'PullStatistics');
+    // agenda.now('ReconcileSlateRosters', {slateId: '39693'});
+
+    // NBA
+    await agendaNba.start();
+    // await agendaNba.every('1 day', 'GetSlates', {sport: 'nba'});
+    
   })();
 });
