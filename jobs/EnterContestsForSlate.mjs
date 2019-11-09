@@ -44,7 +44,7 @@ export default function(agenda, db) {
     contests === undefined ? console.log(`getContests returned undefined obj`) : '';
 
     // 4.5 - Filter contests
-    let theContest = filterContests(contests);
+    let theContest = filterContests(contests, sport);
     theContest === undefined ? console.log(`filterContests returned undefined obj`) : '';
     
     // 5 - Get entries from db

@@ -107,7 +107,11 @@ export const getContests = (db, slateId) => {
     });
 };
 
-export const filterContests = (contests) => {
+export const filterContests = (contests, sport) => {
+  let maxEntries = 9;
+  if (sport === 'nba') {
+    maxEntries = 5;
+  }
 
   let filteredContests = [];
   
@@ -117,7 +121,7 @@ export const filterContests = (contests) => {
     let isLowCost = contest.entry_fee <= 0.25;
     let isNotRestricted = contest.restricted === false;
     let isMonetaryPrize = contest.prizes.total > 0;
-    let canEnterAllLineups = contest.max_entries_per_user >= 9;
+    let canEnterAllLineups = contest.max_entries_per_user >= maxEntries;
 
     return (
       isNotFull && 
@@ -136,7 +140,7 @@ export const filterContests = (contests) => {
       let isLargeContest = contest.size.max >= 100;
       let isLowCost = contest.entry_fee <= 0.25;
       let isNotRestricted = contest.restricted === false;
-      let canEnterAllLineups = contest.max_entries_per_user >= 9;
+      let canEnterAllLineups = contest.max_entries_per_user >= maxEntries;
       
       return (
         isNotFull && 
