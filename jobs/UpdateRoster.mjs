@@ -50,6 +50,7 @@ export default function(agenda, db) {
               }
             });
           } else {
+            console.log('AHHHH OLD CODE WHY 2');
             console.log(`(UpdateRoster) Updated roster ${rosterId} for algo ${lineup.algorithm} for lineup ${JSON.stringify(lineup)}`)            
             
             let query = {rosterId: rosterId};

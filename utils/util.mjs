@@ -267,7 +267,7 @@ export const getGameStartTimes = (fixtures) => {
 
 
 // 8 - Schedule Updates for slate
-export const scheduleSlatewideRostersUpdates = (agenda, slate, startDates) => {
+export const scheduleSlatewideRostersUpdates = (agenda, slate, startDates, sport) => {
   agenda.jobs({name: 'UpdateRostersInSlate', nextRunAt: {$ne: null}})
     .then(jobs => {
       let thisSlatesJobs = jobs.filter(job => {
@@ -285,7 +285,7 @@ export const scheduleSlatewideRostersUpdates = (agenda, slate, startDates) => {
           console.log(`Already scheduled update for: ${newStartDate} for ${slate.fixture_lists[0].id}`)          
         } else {
           console.log(`Scheduling update for: ${newStartDate} for ${slate.fixture_lists[0].id}`)
-          agenda.schedule(newStartDate, 'UpdateRostersInSlate', {slate: slate});
+          agenda.schedule(newStartDate, 'UpdateRostersInSlate', {slate: slate, sport: sport});
         }
       });
 
@@ -377,7 +377,7 @@ export const addRemainingSalaryToRosters = (rosters, players, totalSalary) => {
 }
 
 // 6 - Get Lineup Updates
-export const getLineupUpdates = (players, usedPositions, algorithm, remainingSalary) => {
+export const getLineupUpdates = (players, usedPositions, algorithm, remainingSalary, sport) => {
   // Filter out non swappable players
   let swappablePlayers = filterOutNonSwappablePlayers(players);
   swappablePlayers === undefined ? console.log(`filterOutNonSwappablePlayers returned undefined obj`) : '';
@@ -386,7 +386,7 @@ export const getLineupUpdates = (players, usedPositions, algorithm, remainingSal
   let availablePlayers = filterOutInjuredPlayers(swappablePlayers);
   availablePlayers === undefined ? console.log(`filterOutInjuredPlayers returned undefined obj`) : '';
 
-  return axios.post(`${LINEUP_API_HOST}/api/lineup/${algorithm}`, {
+  return axios.post(`${LINEUP_API_HOST}/api/${sport}/lineup/${algorithm}`, {
     available: availablePlayers,
     usedPositions,
     remainingSalary

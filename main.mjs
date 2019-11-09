@@ -54,6 +54,11 @@ mongodb.MongoClient.connect(MONGO_CONN_STR, mongoOptions, function(err, client) 
   // Create NBA Jobs
   GetSlates(agendaNba, client.db("fantasynba"));
   EnterContestsForSlate(agendaNba, client.db("fantasynba"));
+  JoinContest(agendaNba, client.db("fantasynba"));
+  UpdateRoster(agendaNba, client.db("fantasynba"));  
+  UpdateRostersInSlate(agendaNba, client.db("fantasynba"));
+  PullStatistics(agendaNba, client.db("fantasynba"));
+  PullStatisticsByEntry(agendaNba, client.db("fantasynba"));
   
   // Start Express listening
   app.listen(port, () => console.log(`Jobs Dashboards listening on port ${port}!`));  
@@ -69,7 +74,8 @@ mongodb.MongoClient.connect(MONGO_CONN_STR, mongoOptions, function(err, client) 
 
     // NBA
     await agendaNba.start();
-    // await agendaNba.every('1 day', 'GetSlates', {sport: 'nba'});
+    await agendaNba.every('1 day', 'GetSlates', {sport: 'nba'});
+    // await agenda.every('1 day', 'PullStatistics');
     
   })();
 });

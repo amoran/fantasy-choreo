@@ -16,21 +16,22 @@ export default function(agenda, db) {
   agenda.define('UpdateRostersInSlate', {priority: 'high', concurrency: 1}, async job => {
     const slateId = job.attrs.data.slate.fixture_lists[0].id;
     const totalSalary = job.attrs.data.slate.fixture_lists[0].salary_cap;
+    const sport = job.attrs.data.sport;
 
     console.log(`(UpdateRostersInSlate) Updating rosters for slateId ${slateId} with totalSalary ${totalSalary}`);
 
     // 1 - Get swappable and uninjured players
     let players = await getPlayers(slateId);
     players === undefined ? console.log(`getPlayers returned undefined obj`) : '';
-    
+
     // 2 - Get entries from db
     let entries = await getEntriesFromDb(db, slateId);
     entries === undefined ? console.log(`getEntriesFromDb returned undefined obj`) : '';    
-    
+
     // 3 - Get rosters for entries (deduped). rosters = [{rosterId, algorithm, players}]
     let rosters = getRostersForEntries(entries);
     rosters === undefined ? console.log(`getRostersForEntries returned undefined obj`) : '';    
-    
+
     // 4 - Add used positions to rosters. rosters = [{rosterId, algorithm, players, usedPositions}]
     rosters = addUsedPositionsToRosters(rosters, players);
     rosters === undefined ? console.log(`addUsedPositionsToRosters returned undefined obj`) : '';
@@ -44,7 +45,7 @@ export default function(agenda, db) {
     for (const roster of rosters) {
 
       // Get lineup updates from lineup generator API
-      let lineupUpdates = await getLineupUpdates(players, roster.usedPositions, roster.algorithm, roster.remainingSalary);
+      let lineupUpdates = await getLineupUpdates(players, roster.usedPositions, roster.algorithm, roster.remainingSalary, sport);
 
       // Combine updates with existing lineup to get new one
       let newLineup = addUpdatesToLineup(players, roster, lineupUpdates);
