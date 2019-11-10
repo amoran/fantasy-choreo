@@ -62,13 +62,13 @@ export const filterOutInjuredPlayers = (players) => {
 // 2 - Get lineups for each algo. 
 export const getLineups = (players, sport) => {
   sport = sport || 'nfl';
+  console.log(players);
   return axios.post(`${LINEUP_API_HOST}/api/${sport}/lineup`, players)
     .then(lineupResponse => {
-      console.log(lineupResponse.data);
 
       // Make sure lineups have all 9 players in them.
       let ninePlayerLineups = lineupResponse.data.filter(lineup => {
-        return lineup.players.length === 9;
+        return lineup !== null && lineup.players.length === 9;
       });
 
       // TODO: Filter out lineups with MORE THAN 4 players from a single team.
