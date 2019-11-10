@@ -12,12 +12,6 @@ export default function(agenda, db) {
         axios.post(`${FANDUEL_WRAPPER_HOST}/rosters/${rosterId}`, lineup)
         .then(response => {
 
-          console.log(response.status);
-
-          if (response.status !== 200) {
-            console.log(`(UpdateRoster) Failed to update roster ${rosterId} for algo ${lineup.algorithm} due to non-200 status code ${response.status}`);                  
-          }
-
           let newRosterId = (((response.data.operations || [])[0] || {}).roster || {}).id;
           if (newRosterId) {
             console.log(`(UpdateRoster) Updated roster ${rosterId} for algo ${lineup.algorithm} for lineup ${JSON.stringify(lineup)}`)            
@@ -74,7 +68,11 @@ export default function(agenda, db) {
         })
         .catch(error => {
           console.log(`(UpdateRoster) Failed to update roster ${rosterId} for algo ${lineup.algorithm} for reason ${JSON.stringify((error.response || {}).data)}`)            
-          console.log(error);
+          console.error(error.request.url);
+          console.error(JSON.stringify(error.response.data));
+          console.error(error.response.status);
+          console.error(error.response.headers);
+          console.error(JSON.stringify(postData));
         });
       }, Math.floor(Math.random()*10 * 6000));
   })
