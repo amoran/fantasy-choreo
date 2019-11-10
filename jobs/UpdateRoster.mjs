@@ -12,6 +12,8 @@ export default function(agenda, db) {
         axios.post(`${FANDUEL_WRAPPER_HOST}/rosters/${rosterId}`, lineup)
         .then(response => {
 
+          console.log(response.status);
+
           if (response.status !== 200) {
             console.log(`(UpdateRoster) Failed to update roster ${rosterId} for algo ${lineup.algorithm} due to non-200 status code ${response.status}`);                  
           }
