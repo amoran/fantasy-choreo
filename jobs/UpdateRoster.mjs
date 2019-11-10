@@ -68,11 +68,11 @@ export default function(agenda, db) {
         })
         .catch(error => {
           console.log(`(UpdateRoster) Failed to update roster ${rosterId} for algo ${lineup.algorithm} for reason ${JSON.stringify((error.response || {}).data)}`)            
-          console.error(error.request.url);
+          console.error(`${FANDUEL_WRAPPER_HOST}/rosters/${rosterId}`);
           console.error(JSON.stringify(error.response.data));
           console.error(error.response.status);
           console.error(error.response.headers);
-          console.error(JSON.stringify(postData));
+          console.error(JSON.stringify(lineup));
         });
       }, Math.floor(Math.random()*10 * 6000));
   })
