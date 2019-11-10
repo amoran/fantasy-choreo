@@ -62,7 +62,6 @@ export const filterOutInjuredPlayers = (players) => {
 // 2 - Get lineups for each algo. 
 export const getLineups = (players, sport) => {
   sport = sport || 'nfl';
-  console.log(players);
   return axios.post(`${LINEUP_API_HOST}/api/${sport}/lineup`, players)
     .then(lineupResponse => {
 
