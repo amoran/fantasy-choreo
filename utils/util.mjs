@@ -64,6 +64,7 @@ export const getLineups = (players, sport) => {
   sport = sport || 'nfl';
   return axios.post(`${LINEUP_API_HOST}/api/${sport}/lineup`, players)
     .then(lineupResponse => {
+      console.log(lineupResponse.data);
 
       // Make sure lineups have all 9 players in them.
       let ninePlayerLineups = lineupResponse.data.filter(lineup => {
