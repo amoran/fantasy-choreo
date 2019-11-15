@@ -68,14 +68,14 @@ mongodb.MongoClient.connect(MONGO_CONN_STR, mongoOptions, function(err, client) 
     
     // NFL
     await agenda.start();
-    await agenda.every('1 day', 'GetSlates', {sport: 'nfl'});
+    await agenda.every('12 hours', 'GetSlates', {sport: 'nfl'});
     await agenda.every('1 day', 'PullStatistics');
     // agenda.now('ReconcileSlateRosters', {slateId: '39693'});
 
     // NBA
     await agendaNba.start();
-    await agendaNba.every('1 day', 'GetSlates', {sport: 'nba'});
-    // await agenda.every('1 day', 'PullStatistics');
+    await agendaNba.every('6 hours', 'GetSlates', {sport: 'nba'});
+    await agendaNba.every('1 day', 'PullStatistics');
     
   })();
 });
